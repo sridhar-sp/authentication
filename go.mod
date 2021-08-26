@@ -1,3 +1,3 @@
-module github.com/half-blood-prince/authentication/1
+module github.com/half-blood-prince/authentication
 
 go 1.16
