@@ -23,6 +23,12 @@
   "author": "Sridhar S",
   "license": "Apache-2.0",
   "devDependencies": {
+    "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.15",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
   }
 }
