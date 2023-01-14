@@ -1,0 +1,28 @@
+{
+  "name": "authentication",
+  "version": "1.0.0",
+  "description": "Authentication service using express js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node build/app.js",
+    "start:prod": "node build/app.js",
+    "tsc": "tsc",
+    "build": "tsc",
+    "dev": "tsnd --respawn  ./src/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-personal:sridhar-sp/authentication.git"
+  },
+  "keywords": [
+    "authentication",
+    "firebase-authentication",
+    "express.js"
+  ],
+  "author": "Sridhar S",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
+}
