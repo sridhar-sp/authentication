@@ -1,7 +1,8 @@
 import jwt, { Algorithm } from "jsonwebtoken";
 import config from "../config";
 import JWTAccessTokenPayload from "../model/jwtAccessTokenPayload";
-import JWTRefreshTokenPayload from "../model/JWTRefreshTokenPayload";
+import JWTRefreshTokenPayload from "../model/jwtRefreshTokenPayload";
+import JWTToken from "../model/jwtToken";
 
 import TokenRepository from "../repository/tokenRepository";
 import TokenService from "./tokenService";
@@ -41,20 +42,20 @@ class TokenServiceImpl implements TokenService {
     );
   }
 
-  verifyAccessToken(token: string): JWTAccessTokenPayload | null {
+  verifyAccessToken(token: string): JWTToken | null {
     return this.verifyToken(token, config.accessTokenConfig.secret);
   }
 
-  verifyRefreshToken(refreshToken: string): JWTRefreshTokenPayload | null {
+  verifyRefreshToken(refreshToken: string): JWTToken | null {
     return this.verifyToken(refreshToken, config.refreshTokenConfig.secret);
   }
 
-  verifyAccessTokenIgnoreExpiry(token: string): JWTRefreshTokenPayload | null {
+  verifyAccessTokenIgnoreExpiry(token: string): JWTToken | null {
     try {
       return jwt.verify(token, config.accessTokenConfig.secret, {
         algorithms: [TokenServiceImpl.JWT_ALGORITHM],
         ignoreExpiration: true,
-      }) as JWTAccessTokenPayload;
+      }) as JWTToken;
     } catch (e) {
       return null;
     }
@@ -67,11 +68,11 @@ class TokenServiceImpl implements TokenService {
     });
   }
 
-  private verifyToken(token: string, secret: string): JWTAccessTokenPayload | null {
+  private verifyToken(token: string, secret: string): JWTToken | null {
     try {
       return jwt.verify(token, secret, {
         algorithms: [TokenServiceImpl.JWT_ALGORITHM],
-      }) as JWTAccessTokenPayload;
+      }) as JWTToken;
     } catch (e) {
       return null;
     }

@@ -4,10 +4,10 @@ import FirebaseAuth from "../firebase/firebaseAuth";
 import logger from "../logger";
 import AuthResponse from "../model/authResponse";
 import ErrorResponse from "../model/errorResponse";
-import JWTAccessTokenPayload from "../model/jwtAccessTokenPayload";
-import JWTRefreshTokenPayload from "../model/JWTRefreshTokenPayload";
+import SimpleUserRecord from "../model/simpleUserRecord";
+import JWTToken from "../model/jwtToken";
 import TokenService from "../service/tokenService";
-import AuthProvider from "./AuthProvider";
+import AuthProvider from "./authProvider";
 
 const TAG = "FirebaseAuthProvider";
 
@@ -55,7 +55,20 @@ class FirebaseAuthProvider implements AuthProvider {
     }
   }
 
-  accessTokenValidator(req: any, res: Response, next: NextFunction): void {
+  async getUser(userId: string): Promise<SimpleUserRecord> {
+    try {
+      const userRecord = await this.firebaseAuth.getUser(userId);
+      return SimpleUserRecord.fromFirebaseUserRecord(userRecord.toJSON());
+    } catch (e) {
+      throw ErrorResponse.createErrorResponse(HTTP_STATUS_CODES.NOT_FOUND, "No record found");
+    }
+  }
+
+  verifyAccessToken(accessToken: string): JWTToken | null {
+    return this.tokenService.verifyAccessToken(accessToken); // Check integrity and expiry of the accessToken
+  }
+
+  accessTokenValidatorMiddleware(req: any, res: Response, next: NextFunction): void {
     const accessToken = this.parseAccessTokenFromRequest(req);
 
     if (!accessToken) {
@@ -69,13 +82,15 @@ class FirebaseAuthProvider implements AuthProvider {
     next();
   }
 
-  verifyAccessToken(req: any, res: Response, next: NextFunction): void {
-    const payload = this.tokenService.verifyAccessToken(req.accessToken); // Check integrity and expiry of the accessToken
+  verifyAccessTokenMiddleware(req: any, res: Response, next: NextFunction): void {
+    const payload = this.verifyAccessToken(req.accessToken); // Check integrity and expiry of the accessToken
 
     if (payload == null) {
       res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json(ErrorResponse.unAuthorized());
       return;
     }
+
+    req.userId = payload.userId;
 
     next();
   }
@@ -106,16 +121,16 @@ class FirebaseAuthProvider implements AuthProvider {
     });
   }
 
-  private verifyAccessTokenIgnoreExpiry(accessToken: string): Promise<JWTAccessTokenPayload> {
-    return new Promise((resolve: (tokenPayload: JWTAccessTokenPayload) => void, reject: (error: string) => void) => {
+  private verifyAccessTokenIgnoreExpiry(accessToken: string): Promise<JWTToken> {
+    return new Promise((resolve: (tokenPayload: JWTToken) => void, reject: (error: string) => void) => {
       const payload = this.tokenService.verifyAccessTokenIgnoreExpiry(accessToken);
       if (payload != null) resolve(payload);
       else reject("Error while extracting access token payload");
     });
   }
 
-  private verifyRefreshToken(refreshToken: string): Promise<JWTRefreshTokenPayload> {
-    return new Promise((resolve: (tokenPayload: JWTRefreshTokenPayload) => void, reject: (error: string) => void) => {
+  private verifyRefreshToken(refreshToken: string): Promise<JWTToken> {
+    return new Promise((resolve: (tokenPayload: JWTToken) => void, reject: (error: string) => void) => {
       const payload = this.tokenService.verifyRefreshToken(refreshToken);
       if (payload != null) resolve(payload);
       else reject("Error while extracing refresh token payload");

@@ -2,11 +2,11 @@ import config from "./config";
 import express, { Response } from "express";
 import bodyParser from "body-parser";
 import logger from "./logger";
-import SuccessResponse from "./model/successResponse";
 import AuthResponse from "./model/authResponse";
 import ErrorResponse from "./model/errorResponse";
 import { HTTP_STATUS_CODES } from "./constant/httpStatusCode";
-import AuthProviderFactory from "./auth/AuthProviderFactory";
+import AuthProviderFactory from "./auth/authProviderFactory";
+import SimpleUserRecord from "./model/simpleUserRecord";
 
 const TAG = "APP";
 
@@ -32,24 +32,40 @@ app.post("/token/refresh", async (req: any, res: Response) => {
       res.status(HTTP_STATUS_CODES.OK).json(authResponse);
     })
     .catch((errorResponse: ErrorResponse) => {
-      console.log("***** refresh error ", errorResponse);
       res.status(errorResponse.code).json(errorResponse);
     });
 });
 
-app.use(AuthProviderFactory.accessTokenValidator);
-app.use(AuthProviderFactory.verifyAccessToken);
+app.get(
+  "/token/verify",
+  AuthProviderFactory.accessTokenValidatorMiddleware,
+  async (req: any, res: express.Response) => {
+    const jwtToken = AuthProviderFactory.getAuthProvider(req).verifyAccessToken(req.accessToken);
 
-app.get("/token/verify", async (req: any, res: express.Response) => {
-  res.status(200).json(SuccessResponse.createSuccessResponse("verify"));
-});
+    if (jwtToken != null) res.status(HTTP_STATUS_CODES.OK).json(jwtToken);
+    else res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json(ErrorResponse.unAuthorized());
+  }
+);
+
+app.use(AuthProviderFactory.accessTokenValidatorMiddleware); // Verify bearer token and parse and forward accessToken on the request
+app.use(AuthProviderFactory.verifyAccessTokenMiddleware); // Validate accessToken and set userId in request
 
 app.get("/users/me", async (req: any, res: express.Response) => {
-  res.status(200).json(SuccessResponse.createSuccessResponse("Me"));
+  AuthProviderFactory.getAuthProvider(req)
+    .getUser(req.userId)
+    .then((userRecord: SimpleUserRecord) => res.status(HTTP_STATUS_CODES.OK).json(userRecord))
+    .catch((errorResponse: ErrorResponse) => {
+      res.status(errorResponse.code).json(errorResponse);
+    });
 });
 
 app.get("/users/:id", async (req: any, res: express.Response) => {
-  res.status(200).json(SuccessResponse.createSuccessResponse("Id"));
+  AuthProviderFactory.getAuthProvider(req)
+    .getUser(req.params.id)
+    .then((userRecord: SimpleUserRecord) => res.status(HTTP_STATUS_CODES.OK).json(userRecord))
+    .catch((errorResponse: ErrorResponse) => {
+      res.status(errorResponse.code).json(errorResponse);
+    });
 });
 
 app.listen(config.port, () => {

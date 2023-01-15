@@ -1,16 +1,15 @@
-import JWTAccessTokenPayload from "../model/jwtAccessTokenPayload";
-import JWTRefreshTokenPayload from "../model/JWTRefreshTokenPayload";
+import JWTToken from "../model/jwtToken";
 
 interface TokenService {
   generateAccessToken(userId: string): string;
 
   generateRefreshToken(userId: string): string;
 
-  verifyAccessToken(token: string): JWTAccessTokenPayload | null;
+  verifyAccessToken(token: string): JWTToken | null;
 
-  verifyRefreshToken(refreshToken: string): JWTRefreshTokenPayload | null;
+  verifyRefreshToken(refreshToken: string): JWTToken | null;
 
-  verifyAccessTokenIgnoreExpiry(token: string): JWTRefreshTokenPayload | null;
+  verifyAccessTokenIgnoreExpiry(token: string): JWTToken | null;
 
   getRefreshToken(userId: string): Promise<string | null>;
 

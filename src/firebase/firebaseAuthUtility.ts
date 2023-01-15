@@ -1,3 +1,4 @@
+import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import FirebaseAuth from "./firebaseAuth";
 import firebase from "./index";
 
@@ -13,6 +14,10 @@ class FirebaseAuthImpl implements FirebaseAuth {
         .catch(reject);
     });
   };
+
+  async getUser(userId: string): Promise<UserRecord> {
+    return firebase.auth().getUser(userId);
+  }
 }
 
 export default FirebaseAuthImpl;

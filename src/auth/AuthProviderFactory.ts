@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import FirebaseAuthImpl from "../firebase/firebaseAuthUtility";
 import TokenRepositoryImpl from "../repository/tokenRepositoryImpl";
 import TokenServiceImpl from "../service/tokenServiceImpl";
-import AuthProvider from "./AuthProvider";
-import FirebaseAuthProvider from "./FirebaseAuthProvider";
+import AuthProvider from "./authProvider";
+import FirebaseAuthProvider from "./firebaseAuthProvider";
 import redisDbWrapper from "../db/instance";
-import FallbackAuthProvider from "./FallbackAuthProvider";
+import FallbackAuthProvider from "./fallbackAuthProvider";
 
 enum AUTH_PROVIDER {
   FIREBASE = "firebase",
@@ -39,12 +39,12 @@ class AuthProviderFactory {
     }
   }
 
-  static accessTokenValidator(req: any, res: Response, next: NextFunction): void {
-    return AuthProviderFactory.getAuthProvider(req).accessTokenValidator(req, res, next);
+  static accessTokenValidatorMiddleware(req: any, res: Response, next: NextFunction): void {
+    return AuthProviderFactory.getAuthProvider(req).accessTokenValidatorMiddleware(req, res, next);
   }
 
-  static verifyAccessToken(req: any, res: Response, next: NextFunction): void {
-    return AuthProviderFactory.getAuthProvider(req).verifyAccessToken(req, res, next);
+  static verifyAccessTokenMiddleware(req: any, res: Response, next: NextFunction): void {
+    return AuthProviderFactory.getAuthProvider(req).verifyAccessTokenMiddleware(req, res, next);
   }
 }
 
