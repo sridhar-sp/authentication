@@ -6,8 +6,8 @@ class ErrorResponse extends BaseResponse {
     return new ErrorResponse(code, message);
   }
 
-  static unAuthorized() {
-    return ErrorResponse.createErrorResponse(HTTP_STATUS_CODES.UNAUTHORIZED, "Unauthorized");
+  static unAuthorized(message = "Unauthorized") {
+    return ErrorResponse.createErrorResponse(HTTP_STATUS_CODES.UNAUTHORIZED, message);
   }
 
   toJson() {
