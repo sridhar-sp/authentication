@@ -1,6 +1,6 @@
 # Authentication
 
-The authentication service is built using Express.js and currently utilizes Firebase as its primary authentication source. However, it can also support other authentication providers by implementing the AuthProvider interface. The specific provider to be used will be determined by the value of the x-auth-provider header in the request.
+The authentication service is built using Express.js and currently utilizes Firebase as its primary authentication source. However, it can also support other authentication providers by implementing the AuthProvider interface. The specific provider to be used will be determined by the value of the `x-auth-provider` header in the request.
 
 ---
 
