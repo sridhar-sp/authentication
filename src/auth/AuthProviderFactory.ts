@@ -11,6 +11,8 @@ enum AUTH_PROVIDER {
   FIREBASE = "firebase",
 }
 
+const AUTH_PROVIDER_HEADER_KEY = "x-auth-provider";
+
 class AuthProviderFactory {
   private static authProviderCache: Map<string, AuthProvider> = new Map();
 
@@ -19,7 +21,10 @@ class AuthProviderFactory {
   private static fallbackAuthProvider = new FallbackAuthProvider();
 
   static getAuthProvider(request: Request): AuthProvider {
-    if (request.headers["X-Auth-Provider"] && request.headers["X-Auth-Provider"] === AUTH_PROVIDER.FIREBASE) {
+    if (
+      request.headers[AUTH_PROVIDER_HEADER_KEY] &&
+      request.headers[AUTH_PROVIDER_HEADER_KEY] === AUTH_PROVIDER.FIREBASE
+    ) {
       const cachedFirebaseProvider = AuthProviderFactory.authProviderCache.get(AUTH_PROVIDER.FIREBASE);
       if (cachedFirebaseProvider) return cachedFirebaseProvider;
 

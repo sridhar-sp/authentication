@@ -27,11 +27,12 @@ app.post("/token", async (req: any, res: Response) => {
 
 app.post("/token/refresh", async (req: any, res: Response) => {
   AuthProviderFactory.getAuthProvider(req)
-    .authenticateUserBasedOnRefreshToken(req.accessToken)
+    .authenticateUserBasedOnRefreshToken(req)
     .then((authResponse: AuthResponse) => {
       res.status(HTTP_STATUS_CODES.OK).json(authResponse);
     })
     .catch((errorResponse: ErrorResponse) => {
+      console.log("***** refresh error ", errorResponse);
       res.status(errorResponse.code).json(errorResponse);
     });
 });
@@ -39,15 +40,15 @@ app.post("/token/refresh", async (req: any, res: Response) => {
 app.use(AuthProviderFactory.accessTokenValidator);
 app.use(AuthProviderFactory.verifyAccessToken);
 
-app.post("/token/verify", async (req: any, res: express.Response) => {
+app.get("/token/verify", async (req: any, res: express.Response) => {
   res.status(200).json(SuccessResponse.createSuccessResponse("verify"));
 });
 
-app.post("/users/me", async (req: any, res: express.Response) => {
+app.get("/users/me", async (req: any, res: express.Response) => {
   res.status(200).json(SuccessResponse.createSuccessResponse("Me"));
 });
 
-app.post("/users/:id", async (req: any, res: express.Response) => {
+app.get("/users/:id", async (req: any, res: express.Response) => {
   res.status(200).json(SuccessResponse.createSuccessResponse("Id"));
 });
 
