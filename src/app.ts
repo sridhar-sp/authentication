@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 
 app.post("/token", async (req: any, res: Response) => {
   AuthProviderFactory.getAuthProvider(req)
-    .authenticateUser(req.uid)
+    .authenticateUser(req)
     .then((authResponse: AuthResponse) => {
       res.status(HTTP_STATUS_CODES.OK).json(authResponse);
     })
