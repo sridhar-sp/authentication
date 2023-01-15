@@ -4,6 +4,27 @@ The authentication service is built using Express.js and currently utilizes Fire
 
 ---
 
+### Prerequisites
+
+- To run this project locally, you must have Node.js, npm, and Redis installed on your machine.
+
+### Execution
+
+This project is set up to use 'ts-node-dev', allowing for changes to take effect immediately without the need to restart the server.
+Use the following command to start the application in development mode:
+
+```
+$ yarn dev
+```
+
+To run the app in production mode, use the following command:
+
+```
+$ yarn build && yarn start:prod
+```
+
+---
+
 `POST /token `
 
 ```
