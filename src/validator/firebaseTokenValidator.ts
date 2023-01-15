@@ -8,7 +8,7 @@ const firebaseTokenValidator = (req: any, res: Response, next: NextFunction) => 
   if (!userToken) {
     res
       .status(HTTP_STATUS_CODES.UNPROCESSABLE_ENTITY)
-      .json(ErrorResponse.createErrorResponse(422, "User token is missing"));
+      .json(ErrorResponse.createErrorResponse(HTTP_STATUS_CODES.UNPROCESSABLE_ENTITY, "User token is missing"));
     return;
   }
 

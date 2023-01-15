@@ -8,7 +8,7 @@ import AuthServiceImpl from "./service/authServiceImpl";
 import logger from "./logger";
 import SuccessResponse from "./model/successResponse";
 import firebaseTokenValidator from "./validator/firebaseTokenValidator";
-import TokenResponse from "./model/tokenResponse";
+import AuthResponse from "./model/authResponse";
 import accessTokenValidator from "./validator/accessTokenValidator";
 import AccessTokenAuthMiddleware from "./middleware/accessTokenAuthMiddleware";
 import FirebaseAuthMiddleware from "./middleware/firebaseAuthMiddleware";
@@ -38,7 +38,7 @@ app.post(
     authService
       .authenticateUser(req.uid)
       .then((token) => {
-        res.status(HTTP_STATUS_CODES.OK).json(SuccessResponse.createSuccessResponse(TokenResponse.create(token)));
+        res.status(HTTP_STATUS_CODES.OK).json(SuccessResponse.createSuccessResponse(AuthResponse.create(token)));
       })
       .catch((errorResponse: ErrorResponse) => {
         res.status(errorResponse.code).json(errorResponse);
@@ -50,7 +50,7 @@ app.post("/token/refresh", accessTokenValidator, async (req: any, res: express.R
   authService
     .authenticateUserBasedOnRefreshToken(req.accessToken)
     .then((token) => {
-      res.status(HTTP_STATUS_CODES.OK).json(SuccessResponse.createSuccessResponse(TokenResponse.create(token)));
+      res.status(HTTP_STATUS_CODES.OK).json(SuccessResponse.createSuccessResponse(AuthResponse.create(token)));
     })
     .catch((errorResponse: ErrorResponse) => {
       res.status(errorResponse.code).json(errorResponse);

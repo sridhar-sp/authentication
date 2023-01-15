@@ -1,4 +1,4 @@
-class TokenResponse {
+class AuthResponse {
   token: string;
 
   constructor(token: string) {
@@ -6,8 +6,8 @@ class TokenResponse {
   }
 
   static create(token: string) {
-    return new TokenResponse(token);
+    return new AuthResponse(token);
   }
 }
 
-export default TokenResponse;
+export default AuthResponse;
