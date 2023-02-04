@@ -1,7 +1,7 @@
 interface TokenRepository {
-  getRefreshToken(userId: string): Promise<string | null>;
+  getRefreshToken(userIdBase64Hash: string): Promise<string | null>;
 
-  saveRefreshToken(userId: string, refreshToken: string): Promise<boolean>;
+  saveRefreshToken(userIdBase64Hash: string, refreshToken: string): Promise<boolean>;
 }
 
 export default TokenRepository;

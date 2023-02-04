@@ -1,9 +1,11 @@
+import JWTAccessTokenPayload from "../model/jwtAccessTokenPayload";
+import JWTRefreshTokenPayload from "../model/jwtRefreshTokenPayload";
 import JWTToken from "../model/jwtToken";
 
 interface TokenService {
-  generateAccessToken(userId: string): string;
+  generateAccessToken(payload: JWTAccessTokenPayload): string;
 
-  generateRefreshToken(userId: string): string;
+  generateRefreshToken(payload: JWTRefreshTokenPayload): string;
 
   verifyAccessToken(token: string): JWTToken | null;
 
@@ -11,9 +13,9 @@ interface TokenService {
 
   verifyAccessTokenIgnoreExpiry(token: string): JWTToken | null;
 
-  getRefreshToken(userId: string): Promise<string | null>;
+  getRefreshToken(userIdBase64Hash: string): Promise<string | null>;
 
-  saveRefreshToken(userId: string, refreshToken: string): Promise<boolean>;
+  saveRefreshToken(userIdBase64Hash: string, refreshToken: string): Promise<boolean>;
 }
 
 export default TokenService;

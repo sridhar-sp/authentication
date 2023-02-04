@@ -12,12 +12,12 @@ class TokenRepositoryImpl implements TokenRepository {
     this.dbWrapper = dbWrapper;
   }
 
-  getRefreshToken(userId: string): Promise<string | null> {
-    return this.dbWrapper.getString(KEY.PARTIAL_KEY_REFRESH_TOKEN + userId);
+  getRefreshToken(userIdBase64Hash: string): Promise<string | null> {
+    return this.dbWrapper.getString(KEY.PARTIAL_KEY_REFRESH_TOKEN + userIdBase64Hash);
   }
 
-  saveRefreshToken(userId: string, refreshToken: string): Promise<boolean> {
-    return this.dbWrapper.setString(KEY.PARTIAL_KEY_REFRESH_TOKEN + userId, refreshToken);
+  saveRefreshToken(userIdBase64Hash: string, refreshToken: string): Promise<boolean> {
+    return this.dbWrapper.setString(KEY.PARTIAL_KEY_REFRESH_TOKEN + userIdBase64Hash, refreshToken);
   }
 }
 

@@ -6,6 +6,7 @@ import AuthProvider from "./authProvider";
 import FirebaseAuthProvider from "./firebaseAuthProvider";
 import redisDbWrapper from "../db/instance";
 import FallbackAuthProvider from "./fallbackAuthProvider";
+import CryptoUtilsImpl from "../crypto";
 
 enum AUTH_PROVIDER {
   FIREBASE = "firebase",
@@ -30,8 +31,9 @@ class AuthProviderFactory {
 
       const tokenService = new TokenServiceImpl(new TokenRepositoryImpl(redisDbWrapper));
       const firebaseAuth = new FirebaseAuthImpl();
+      const cryptoUtils = new CryptoUtilsImpl();
 
-      const firebaseAuthProvider = new FirebaseAuthProvider(tokenService, firebaseAuth);
+      const firebaseAuthProvider = new FirebaseAuthProvider(tokenService, firebaseAuth, cryptoUtils);
       AuthProviderFactory.authProviderCache.set(AUTH_PROVIDER.FIREBASE, firebaseAuthProvider);
       return firebaseAuthProvider;
     } else {

@@ -18,27 +18,19 @@ class TokenServiceImpl implements TokenService {
     this.tokenRepository = tokenRepository;
   }
 
-  getRefreshToken(userId: string): Promise<string | null> {
-    return this.tokenRepository.getRefreshToken(userId);
+  getRefreshToken(userIdBase64Hash: string): Promise<string | null> {
+    return this.tokenRepository.getRefreshToken(userIdBase64Hash);
   }
 
-  saveRefreshToken(userId: string, refreshToken: string): Promise<boolean> {
-    return this.tokenRepository.saveRefreshToken(userId, refreshToken);
+  saveRefreshToken(userIdBase64Hash: string, refreshToken: string): Promise<boolean> {
+    return this.tokenRepository.saveRefreshToken(userIdBase64Hash, refreshToken);
   }
 
-  generateAccessToken(userId: string): string {
-    return this.generateToken(
-      JWTAccessTokenPayload.create(userId).toJson(),
-      config.accessTokenConfig.secret,
-      config.accessTokenConfig.expiresIn
-    );
+  generateAccessToken(payload: JWTAccessTokenPayload): string {
+    return this.generateToken(payload, config.accessTokenConfig.secret, config.accessTokenConfig.expiresIn);
   }
-  generateRefreshToken(userId: string): string {
-    return this.generateToken(
-      JWTRefreshTokenPayload.create(userId).toJson(),
-      config.refreshTokenConfig.secret,
-      config.refreshTokenConfig.expiresIn
-    );
+  generateRefreshToken(payload: JWTRefreshTokenPayload): string {
+    return this.generateToken(payload, config.refreshTokenConfig.secret, config.refreshTokenConfig.expiresIn);
   }
 
   verifyAccessToken(token: string): JWTToken | null {
@@ -60,7 +52,7 @@ class TokenServiceImpl implements TokenService {
     }
   }
 
-  private generateToken(payload: typeof JWTAccessTokenPayload, secret: string, expiresIn: string) {
+  private generateToken(payload: JWTAccessTokenPayload, secret: string, expiresIn: string) {
     return jwt.sign(payload, secret, {
       algorithm: TokenServiceImpl.JWT_ALGORITHM,
       expiresIn: expiresIn,

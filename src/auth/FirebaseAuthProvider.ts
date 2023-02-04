@@ -8,16 +8,22 @@ import SimpleUserRecord from "../model/simpleUserRecord";
 import JWTToken from "../model/jwtToken";
 import TokenService from "../service/tokenService";
 import AuthProvider from "./authProvider";
+import CryptoUtils from "../crypto/cryptoUtils";
+import config from "../config";
+import JWTAccessTokenPayload from "../model/jwtAccessTokenPayload";
+import JWTRefreshTokenPayload from "../model/jwtRefreshTokenPayload";
 
 const TAG = "FirebaseAuthProvider";
 
 class FirebaseAuthProvider implements AuthProvider {
   tokenService: TokenService;
   firebaseAuth: FirebaseAuth;
+  cryptoUtils: CryptoUtils;
 
-  constructor(tokenService: TokenService, firebaseAuth: FirebaseAuth) {
+  constructor(tokenService: TokenService, firebaseAuth: FirebaseAuth, cryptoUtils: CryptoUtils) {
     this.tokenService = tokenService;
     this.firebaseAuth = firebaseAuth;
+    this.cryptoUtils = cryptoUtils;
   }
 
   async authenticateUser(request: any): Promise<AuthResponse> {
@@ -36,6 +42,7 @@ class FirebaseAuthProvider implements AuthProvider {
         throw ErrorResponse.createErrorResponse(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR, e.message);
       }
     } catch (e: any) {
+      logger.logError(TAG, e.message);
       throw ErrorResponse.unAuthorized();
     }
   }
@@ -50,7 +57,8 @@ class FirebaseAuthProvider implements AuthProvider {
     try {
       const newAccessToken = await this.authenticateBasedOnRefreshToken(accessToken);
       return new AuthResponse(newAccessToken);
-    } catch (e) {
+    } catch (e: any) {
+      logger.logError(TAG, e.message || e);
       throw ErrorResponse.unAuthorized();
     }
   }
@@ -90,18 +98,31 @@ class FirebaseAuthProvider implements AuthProvider {
       return;
     }
 
-    req.userId = payload.userId;
+    try {
+      req.userId = this.cryptoUtils.decryptString(payload.encUserId, config.tokenEncryptSecret);
+    } catch (e: any) {
+      logger.logError(TAG, e);
+      res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json(ErrorResponse.unAuthorized());
+      return;
+    }
 
     next();
   }
 
   private authenticate(userId: string): Promise<string> {
     return new Promise((resolve: (accessToken: string) => void, reject: (error: ErrorResponse) => void) => {
-      const accessToken = this.tokenService.generateAccessToken(userId);
-      const refreshToken = this.tokenService.generateRefreshToken(userId);
+      const encUserId = this.cryptoUtils.encryptString(userId, config.tokenEncryptSecret);
+      const userIdBase64Hash = this.cryptoUtils.createSha256Base64Hash(userId);
+
+      const accessToken = this.tokenService.generateAccessToken(
+        JWTAccessTokenPayload.createAsJson(encUserId, userIdBase64Hash)
+      );
+      const refreshToken = this.tokenService.generateRefreshToken(
+        JWTRefreshTokenPayload.createAsJson(encUserId, userIdBase64Hash)
+      );
 
       this.tokenService
-        .saveRefreshToken(userId, refreshToken)
+        .saveRefreshToken(userIdBase64Hash, refreshToken)
         .then(() => resolve(accessToken))
         .catch(reject);
     });
@@ -111,9 +132,11 @@ class FirebaseAuthProvider implements AuthProvider {
     return new Promise(async (resolve: (accessToken: string) => void, reject: (error: any) => void) => {
       try {
         const accessTokenPayload = await this.verifyAccessTokenIgnoreExpiry(prevAccessToken);
-        const refreshToken = await this.tokenService.getRefreshToken(accessTokenPayload.userId);
-        const refreshTokenPayload = await this.verifyRefreshToken(refreshToken!);
-        const newAccessToken = this.tokenService.generateAccessToken(refreshTokenPayload.userId);
+        const refreshToken = await this.tokenService.getRefreshToken(accessTokenPayload.userIdBase64Hash);
+        const refreshTokenPayload = await this.verifyRefreshToken(refreshToken!!);
+        const newAccessToken = this.tokenService.generateAccessToken(
+          JWTAccessTokenPayload.createAsJson(refreshTokenPayload.encUserId, refreshTokenPayload.userIdBase64Hash)
+        );
         return resolve(newAccessToken);
       } catch (error) {
         return reject(error);

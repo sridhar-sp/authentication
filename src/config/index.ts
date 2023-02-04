@@ -16,6 +16,7 @@ interface Config {
   firebaseConfig: string;
   accessTokenConfig: AccessTokenConfig;
   refreshTokenConfig: RefreshTokenConfig;
+  tokenEncryptSecret: string;
 }
 
 const config: Config = {
@@ -31,6 +32,7 @@ const config: Config = {
     secret: process.env.REFRESH_TOKEN_SECRET!!,
     expiresIn: process.env.REFRESH_TOKEN_EXPIRE_TIME!!,
   },
+  tokenEncryptSecret: process.env.TOKEN_ENCRYPT_SECRET!!,
 };
 
 export default config;
