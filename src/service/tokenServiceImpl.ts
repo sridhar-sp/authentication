@@ -16,7 +16,6 @@ class TokenServiceImpl implements TokenService {
 
   constructor(tokenRepository: TokenRepository) {
     this.tokenRepository = tokenRepository;
-    jwt.verify;
   }
 
   getRefreshToken(userId: string): Promise<string | null> {
